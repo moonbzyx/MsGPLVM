@@ -31,11 +31,12 @@ class Isotropy(Kernel):
                  active_dims=None):
         super().__init__(input_dim, active_dims)
 
-        variance = torch.tensor(1.0) if variance is None else variance
-        self.variance = PyroParam(variance, constraints.positive)
+        self.variance = torch.tensor(1.0) if variance is None else variance
+        # self.variance = PyroParam(self.variance, constraints.positive)
 
-        lengthscale = torch.tensor(1.0) if lengthscale is None else lengthscale
-        self.lengthscale = PyroParam(lengthscale, constraints.positive)
+        self.lengthscale = torch.tensor(
+            1.0) if lengthscale is None else lengthscale
+        # self.lengthscale = PyroParam(self.lengthscale, constraints.positive)
 
     def _square_scaled_dist(self, X, Z=None):
         r"""
@@ -50,10 +51,11 @@ class Isotropy(Kernel):
         Z = self._slice_input(Z)
         if X.size(1) != Z.size(1):
             raise ValueError("Inputs must have the same number of features.")
+
         ll = _torch_sqrt(self.lengthscale)
 
         if self.lengthscale.numel() == 1:
-            ll = torch.eye(self.input_dim) * ll
+            ll = torch.eye(self.input_dim, device=X.device) * ll
         elif self.lengthscale.size(0) == self.input_dim:
             ll = torch.diag(ll)
         else:

@@ -1,0 +1,6 @@
+[01-25] 21:37:15 | INFO     | __main___:_<module>_:_12 - test
+[01-25] 21:37:15 | DEBUG    | __main___:_<module>_:_13 - debug
+[01-25] 21:37:16 | INFO     | __main___:_<module>_:_12 - test
+[01-25] 21:37:16 | DEBUG    | __main___:_<module>_:_13 - debug
+[01-25] 21:37:17 | INFO     | __main___:_<module>_:_12 - test
+[01-25] 21:37:17 | DEBUG    | __main___:_<module>_:_13 - debug

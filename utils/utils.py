@@ -1,3 +1,4 @@
+from unittest import result
 import numpy as np
 from sklearn.cluster import KMeans
 from scipy.io import loadmat
@@ -26,6 +27,28 @@ def init_inducing(init_x, num_inducing, num_gp):
         idx = idx[:num_inducing]
         x_u[k] = init_x[idx, :]
     return x_u
+
+
+class statistics_psi():
+    def __init__(self, phi, sigma, w, mu, S):
+        self.phi = phi
+        self.sigma = sigma**2
+        self.w = w
+        self.mu = mu
+        self.S = S
+        self.N, self.D, self.L = self.phi.shape
+
+    def psi_0(self):
+        phi = self.phi.permute([2, 1, 0]).sum(dim=-1)
+        variance = self.sigma.unsqueeze(-1).expand([self.L, self.D])
+        psi = torch.einsum('ij,ij->ij', [phi, variance])
+        return psi
+
+    def psi_1(self):
+        pass
+
+    def psi_2(self):
+        pass
 
 
 if __name__ == '__main__':

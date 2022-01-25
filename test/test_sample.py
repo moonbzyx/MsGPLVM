@@ -1,6 +1,8 @@
 import pyro.distributions as dist
 import pyro
 import torch
+# from torch.distributions import constraints
+import pyro.distributions.constraints as constraints
 
 # ----------to substitute the for-loop-------------------
 # mean = mean.unsqueeze(-1).expand((len(ruggedness),))
@@ -37,8 +39,15 @@ d = pyro.sample('d', dist.MultivariateNormal(m3, k3))
 # dd = torch.tensor([[1, 2], [3, 4]])
 # d = [i for i in dd.shape]
 # d.append(2)
-print(d)
+# print(d)
 # print(ddsh[0])
 # mean = dd.unsqueeze((-1)).expand(d.append(2))
 # print(mean.shape)
 # print(mean[:, :, 1])
+phi_1 = pyro.param('phi_1', torch.rand((3)))
+phi_2 = pyro.param('phi_2', torch.rand((3)), constraint=constraints.simplex)
+
+print(phi_1)
+print(phi_1.sum())
+print(phi_2)
+print(phi_2.sum())
