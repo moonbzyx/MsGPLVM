@@ -14,6 +14,8 @@ function [K, Knovar, Knophi, argExp] = rbfard2VardistPsi1ComputeMsPar(phi, rbfar
              
     argExp = zeros(N,M); 
     normfactor = ones(N,1);
+% test git_push
+% from matlab to python
 
     for q=1:vardist.latentDimension
         S_q = vardist.covars(:,q);  
@@ -31,3 +33,20 @@ function [K, Knovar, Knophi, argExp] = rbfard2VardistPsi1ComputeMsPar(phi, rbfar
     Knovart = mat2cell(reshape(Knovart,N,M*D),N,M*ones(1,D));
     K = cellfun(@(x)(rbfardKern.variance*x),Knovart,'UniformOutput',0);
 end
+end
+
+% reformulate the model.varZ.phi into the cell form.
+phil = mat2cell(reshape(model.varZ.phi,[model.N*model.D,model.L]),model.N*model.D,ones(1,model.L));
+phidd = cellfun(@(x)(reshape(x,model.N,model.D)),phil,'UniformOutput',0);
+t3=cputime;
+
+model.Stats.Psi0 = 
+cellfun(@(phi,kernl)
+    (cellfun(@(phi)(rbfard2VardistPsi0ComputeMs(phi,kernl,model.varX)),
+        mat2cell(phi,model.N,ones(1,model.D)),'UniformOutput',0)),
+    phidd,model.kern,'UniformOutput',0);
+
+
+[model.Stats.Psi1,model.Stats.P1Knovar,model.Stats.P1Knophi] = cellfun(@(phi,kernl,xul)(rbfard2VardistPsi1ComputeMsPar(phi,kernl, model.varX, xul)),phidd,model.kern,Xu,'UniformOutput',0);
+[model.Stats.Psi2,model.Stats.P2outKern, model.Stats.P2sumKern, model.Stats.P2Kgvar]= cellfun(@(phi,kernl,xul)(rbfard2VardistPsi2ComputeMsPar(phi,kernl, model.varX, xul)),phidd,model.kern,Xu,'UniformOutput',0);
+% disp(['Psi Compute Time: ' num2str((cputime-t3))]);
