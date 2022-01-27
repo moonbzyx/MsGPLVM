@@ -3,6 +3,7 @@ from torch.distributions import constraints
 
 from pyro.contrib.gp.kernels.kernel import Kernel
 from pyro.nn.module import PyroParam
+from loguru import logger
 
 
 def _torch_sqrt(x, eps=1e-12):
@@ -38,13 +39,15 @@ class Isotropy(Kernel):
             1.0) if lengthscale is None else lengthscale
         # self.lengthscale = PyroParam(self.lengthscale, constraints.positive)
 
+    # @logger.catch
     def _square_scaled_dist(self, X, Z=None):
         r"""
         Returns :math:`l * \|\frac{X-Z}\|^2`.
         """
 
         if X.size(1) != self.input_dim:
-            raise ValueError("Input features and input_dim should be equal.")
+            raise ValueError(f"Input features and input_dim should be equal.\
+                inputs is {self.input_dim}, features is {X.size(1)}")
         if Z is None:
             Z = X
         X = self._slice_input(X)

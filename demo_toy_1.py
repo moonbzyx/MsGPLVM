@@ -19,6 +19,8 @@ import pyro.optim as optim
 from pyro.infer import SVI, TraceGraph_ELBO
 import sys
 
+from tqdm import tqdm
+from utils.log_tqdm import my_log
 assert pyro.__version__.startswith('1.8.0')
 
 # this is for running the notebook in our testing framework
@@ -55,16 +57,24 @@ msgplvm = MSGPLVM(config, Y, X).to(device)
 pyro.clear_param_store()
 
 # setup the optimizer and the inference algorithm
-optimizer = optim.Adam({"lr": .0005, "betas": (0.93, 0.999)})
+lr = 0.01
+optimizer = optim.Adam({"lr": lr, "betas": (0.93, 0.999)})
 svi = SVI(msgplvm.model, msgplvm.guide, optimizer, loss=TraceGraph_ELBO())
 
 # training or doing inference
+log = my_log(f'./results/msgplmv_exp{EXPERIMENT_NO}')
+i_tqdm = tqdm(range(3000))
+for i in i_tqdm:
+    loss = svi.step()
+    if i % 30 == 0:
+        log.info(f'Loss is : {loss}')
+    i_tqdm.set_description(f'loss is {loss}')
 
-for k in range(self.max_steps):
-    svi.step(use_decaying_avg_baseline)
-    if k % 100 == 0:
-        print('.', end='')
-        sys.stdout.flush()
+# for k in range(self.max_steps):
+#     svi.step(use_decaying_avg_baseline)
+#     if k % 100 == 0:
+#         print('.', end='')
+#         sys.stdout.flush()
 
 # pyro.render_model(model=msgplvm.model, render_distributions=True)
 # pyro.render_model(model=msgplvm.guide, render_distributions=True)

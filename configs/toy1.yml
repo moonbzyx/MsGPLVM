@@ -1,6 +1,6 @@
 
 experimental_name: demo_toy_1 
-device: cuda 
+device: cpu 
 
 # model hyperparameters
 # alpha: 1
@@ -38,6 +38,7 @@ jitter: 0.0000001
 
 # before ----------------
 # lr: 1e-2
+# lr: 0.0005
 # max_iter: 1000
 # latent_dim_x: 1
 # J: 1

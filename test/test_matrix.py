@@ -7,4 +7,5 @@ b = torch.arange(2 * 2).reshape(([2, 2])) * 0.1
 # c = a.expand([2, 3, 4])
 c = a
 c = a.unsqueeze(-1).expand([4, 3])
-print(c.shape)
+dd = torch.eye(2, 3)
+print(dd)

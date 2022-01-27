@@ -11,7 +11,7 @@ class Psi():
         self.sigma = sigma**2  # L
         self.w = w  # L *Q
         self.mu = mu  # Q * N
-        self.S = S  # Q * N * N
+        self.S = S  # Q * N
         self.N, self.D, self.L = self.phi.shape
         self.Xu = Xu  # L*M*Q
         self.Q = w.shape[1]
@@ -38,9 +38,8 @@ class Psi():
             ([self.L, self.D, self.N, self.M, self.Q]))
         alpha = self.w.unsqueeze(1).unsqueeze(1).unsqueeze(1).expand(
             ([self.L, self.D, self.N, self.M, self.Q]))
-        S = torch.stack([torch.diag(self.S[i]) for i in range(self.Q)
-                         ]).permute([1, 0]).unsqueeze(1).expand(
-                             ([self.L, self.D, self.N, self.M, self.Q]))
+        S = self.S.permute([1, 0]).unsqueeze(1).expand(
+            ([self.L, self.D, self.N, self.M, self.Q]))
         sigma = self.sigma.unsqueeze(-1).unsqueeze(-1).unsqueeze(-1).expand(
             ([self.L, self.D, self.N, self.M]))
         phi = self.phi.permute([2, 1, 0]).unsqueeze(-1).expand(
@@ -133,9 +132,8 @@ class Psi():
             z_t = z.permute([0, 1, 3, 2, 4])
             alpha = self.w.unsqueeze(1).unsqueeze(1).unsqueeze(1).expand(
                 ([self.L, self.D, self.M, self.M, self.Q]))
-            S = torch.stack([torch.diag(self.S[i]) for i in range(self.Q)
-                             ]).permute([1, 0])[n].expand(
-                                 ([self.L, self.D, self.M, self.M, self.Q]))
+            S = self.S.permute([1, 0])[n].expand(
+                ([self.L, self.D, self.M, self.M, self.Q]))
             sigma = (self.sigma**2
                      ).unsqueeze(-1).unsqueeze(-1).unsqueeze(-1).expand(
                          ([self.L, self.D, self.M, self.M]))

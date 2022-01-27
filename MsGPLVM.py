@@ -75,26 +75,22 @@ class MSGPLVM(Parameterized):
     def model(self):
         self.set_mode('model')
 
-        # prepare the plates of model
-        p_N = pyro.plate('N', self.N, device=self.device)  # num of instance
-        # p_M = pyro.plate('M', self.M, device=self.device)  # num of inducing points
-        p_D = pyro.plate('D', self.D,
-                         device=self.device)  # dim of output(observation)
-        # p_Q = pyro.plate('Q', self.Q, device=self.device)  # dim of input(latent)
-        # p_L = pyro.plate('L', self.L, device=self.device)  # num of GP components
-
-        # X is different from self.X (ppca from Y)
         X = pyro.sample(
             'X',
             dist.MultivariateNormal(
-                torch.zeros(self.N, self.Q, device=self.device),
-                torch.eye(self.Q, device=self.device)))
+                torch.zeros(self.Q, self.N, device=self.device),
+                torch.eye(self.N, device=self.device)).to_event(1)).t()
 
         # sampling v and z
-        with p_D:
-            v = pyro.sample('v', dist.Dirichlet(self.alpha))
-            with p_N:
-                z = pyro.sample('z', dist.Multinomial(1, v))
+        # with p_D:
+        v = pyro.sample(
+            'v',
+            dist.Dirichlet(self.alpha.expand([self.D, self.L])).to_event(1))
+        # with p_N:
+        z = pyro.sample(
+            'z',
+            dist.Multinomial(1, v.expand([self.N, self.D,
+                                          self.L])).to_event(2))
 
         # calculate parts of the kerneal groups
         k_L_MM = []  # kernels : Xu_Xu-->u
@@ -117,12 +113,13 @@ class MSGPLVM(Parameterized):
         k_L_MN = torch.stack(k_L_MN, dim=0)
 
         # the inducing outputs, L*D
-        # the number of it's feature is M --> final shape: D*L*M
+        # the number of it's feature is M --> final shape: L*D*M
+        k_L_D_MM = k_L_MM.unsqueeze(1).expand([self.L, self.D, self.M, self.M])
         u = pyro.sample(
             'u',
             dist.MultivariateNormal(
-                torch.zeros(self.D, self.L, self.M, device=self.device),
-                k_L_MM))
+                torch.zeros(self.L, self.D, self.M, device=self.device),
+                k_L_D_MM).to_event(2))
 
         # calculate the mean and kernel of 'f ~ GPs'
         mm_L_D = []
@@ -132,7 +129,7 @@ class MSGPLVM(Parameterized):
             kk = k_L_NN[l] - mm @ k_L_MN[l]
             mm_D = []
             for d in range(self.D):
-                mm_d = mm @ u[d, l, :]
+                mm_d = mm @ u[l, d, :]
                 mm_D.append(mm_d)
             mm_D = torch.stack(mm_D, dim=0)
             mm_L_D.append(mm_D)
@@ -157,11 +154,19 @@ class MSGPLVM(Parameterized):
         kk_D_NN = torch.stack(kk_D_NN, dim=0)
 
         # sampling F and Y
-        F = pyro.sample('F', dist.MultivariateNormal(mm_D_N, kk_D_NN))
+        F = pyro.sample('F',
+                        dist.MultivariateNormal(mm_D_N, kk_D_NN).to_event(1))
         Y = pyro.sample('Y',
-                        dist.MultivariateNormal(F.t(),
-                                                torch.diag(1 / self.beta)),
+                        dist.MultivariateNormal(F.t(), torch.diag(
+                            1 / self.beta)).to_event(1),
                         obs=self.Y)
+
+        # print('*' * 15, 'model parameters', '*' * 15)
+        # print('v.shape', v.shape)
+        # print('z.shape', z.shape)
+        # print('X.shape', X.shape)
+        # print('u.shape', u.shape)
+        # print('F.shpape', F.shape)
 
         return {'X': X, 'u': u, 'F': F, 'v': v, 'z': z}
 
@@ -171,10 +176,10 @@ class MSGPLVM(Parameterized):
 
         # initialize the parameters
         mu = pyro.param("mu", self.X.t())  # Q * N
-        S = pyro.param(
-            "S",
-            torch.eye(self.N, device=self.device).expand(
-                [self.Q, self.N, self.N]) * 0.1)
+        S = pyro.param("S",
+                       (torch.ones(self.N, device=self.device) * 0.1 +
+                        torch.randn(self.N) * 0.001).expand([self.Q, self.N]),
+                       constraint=constraints.positive)
 
         # phi is related to the Dirichlet distribution
         # so sum of phi_id shuould be equal to 1
@@ -187,13 +192,14 @@ class MSGPLVM(Parameterized):
                            torch.rand(self.D, self.L, device=self.device))
         # Xu = pyro.param("Xu", self.Xu)  # it's not parameter in 'model'
 
-        v = pyro.sample('v', dist.Dirichlet(gamma))
-        z = pyro.sample('z', dist.Multinomial(1, phi))
+        v = pyro.sample('v', dist.Dirichlet(gamma).to_event(1))
+        z = pyro.sample('z', dist.Multinomial(1, phi).to_event(2))
 
         # X has the parameters: mu, S
-        X = pyro.sample('X', dist.MultivariateNormal(mu, S))
+        S_ii = torch.stack([torch.diag(S[i]) for i in range(self.Q)], dim=0)
+        X = pyro.sample('X', dist.MultivariateNormal(mu, S_ii).to_event(1)).t()
         # print(X.device)
-        X = X.reshape(self.N, self.Q)  # aligned with the 'X' in 'model'
+        # X = X.reshape(self.N, self.Q)  # aligned with the 'X' in 'model'
 
         # calculate parts of the kerneal groups
         k_L_MM = []  # kernels : Xu_Xu-->u
@@ -241,7 +247,7 @@ class MSGPLVM(Parameterized):
 
         # sampling u
         u = pyro.sample('u',
-                        dist.MultivariateNormal(m_L_D_M, k_L_D_MM).to_event(1))
+                        dist.MultivariateNormal(m_L_D_M, k_L_D_MM).to_event(2))
 
         # calculate the mean and kernel of 'f ~ GPs'
         u = u.permute([1, 0, 2])
@@ -278,7 +284,15 @@ class MSGPLVM(Parameterized):
         kk_D_NN = torch.stack(kk_D_NN, dim=0)
 
         # sampling F
-        F = pyro.sample('F', dist.MultivariateNormal(mm_D_N, kk_D_NN))
+        F = pyro.sample('F',
+                        dist.MultivariateNormal(mm_D_N, kk_D_NN).to_event(1))
+
+        # print('*' * 15, 'guide parameters', '*' * 15)
+        # print('v.shape', v.shape)
+        # print('z.shape', z.shape)
+        # print('X.shape', X.shape)
+        # print('u.shape', u.shape)
+        # print('F.shpape', F.shape)
 
         return {'X': X, 'u': u, 'F': F, 'v': v, 'z': z}
 
@@ -304,8 +318,9 @@ class MSGPLVM(Parameterized):
 # Xu = torch.stack([torch.from_numpy(Xu[i]) for i in range(len(Xu))], dim=0)
 
 # msgplvm = MSGPLVM(config=config, Y=Y, X=X)
-# msgplvm.model()
-# # pyro.render_model(model=msgplvm.model, render_distributions=True)
+# pyro.render_model(model=msgplvm.model, render_distributions=True)
 # pyro.render_model(model=msgplvm.guide, render_distributions=True)
+
+# msgplvm.model()
 # print('*' * 15, 'MsGPLVM class parameters', '*' * 15)
 # print(list(pyro.get_param_store().keys()))

@@ -31,11 +31,11 @@ def my_log(path='./../results/test_tqdm.log'):
 
     format_1 = "<green>{time:[MM-DD] HH:mm:ss}</green> | " \
                 "<level>{level: <8}</level> | " \
-                "<blue>{name}</blue>_:_<cyan>{function}</cyan>_:_<y>{line}</y> - <level>{message}</level>"
+                "<blue>{name}</blue>:_<cyan>{function}</cyan>:_<y>{line}</y> - <level>{message}</level>"
 
     format_2 = "<green>{time:[_DD_] HH:mm:ss.SSS}</green> | " \
                 "<level>{level: <8}</level> | " \
-                "<blue>{name}</blue>_:_<cyan>{function}</cyan>_:_<y>{line}</y> - <level>{message}</level>"
+                "<blue>{name}</blue>:_<cyan>{function}</cyan>:_<y>{line}</y> - <level>{message}</level>"
     # remove the default handler: stderr
     logger.remove()
     # replacing stderr with tqdmHandler

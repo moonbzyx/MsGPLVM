@@ -1,6 +1,6 @@
-[01-25] 21:35:43 | INFO     | __main___:_<module>_:_12 - test
-[01-25] 21:35:43 | DEBUG    | __main___:_<module>_:_13 - debug
-[01-25] 21:35:44 | INFO     | __main___:_<module>_:_12 - test
-[01-25] 21:35:44 | DEBUG    | __main___:_<module>_:_13 - debug
-[01-25] 21:35:45 | INFO     | __main___:_<module>_:_12 - test
-[01-25] 21:35:45 | DEBUG    | __main___:_<module>_:_13 - debug
+[01-26] 09:35:17 | INFO     | __main__:_my_log_test:_60 - This is the 0 info
+[01-26] 09:35:17 | DEBUG    | __main__:_my_log_test:_61 - This is the 0 debug
+[01-26] 09:35:19 | INFO     | __main__:_my_log_test:_60 - This is the 10 info
+[01-26] 09:35:19 | DEBUG    | __main__:_my_log_test:_61 - This is the 10 debug
+[01-26] 09:35:21 | INFO     | __main__:_my_log_test:_60 - This is the 20 info
+[01-26] 09:35:21 | DEBUG    | __main__:_my_log_test:_61 - This is the 20 debug
