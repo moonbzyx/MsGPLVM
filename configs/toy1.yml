@@ -1,24 +1,25 @@
 
 experimental_name: demo_toy_1 
-device: cpu 
+device: cuda 
 
 # model hyperparameters
 # alpha: 1
 # beta: 10
-limit_dim: 2500
-model_type: varmsgplvm
-learn_alpha: 0
-learn_beta: 0
-learn_inducing: 0
-learn_kern: 0
-learn_phi: 0
-fix_var_par: 1 
-KLweight: 0.5
+#
+# limit_dim: 2500
+# model_type: varmsgplvm
+# learn_alpha: 0
+# learn_beta: 0
+# learn_inducing: 0
+# learn_kern: 0
+# learn_phi: 0
+# fix_var_par: 1 
+# KLweight: 0.5
 
-optimise_alpha: 1
-alpha_transform: exp
-optimise_beta: 1
-beta_transform: exp
+# optimise_alpha: 1
+# alpha_transform: exp
+# optimise_beta: 1
+# beta_transform: exp
 
 # model.Q : the latent dimensions of the latent varible x.
 # model.L : the number of the GP base components.
@@ -31,8 +32,8 @@ L: 3
 M: 50
 N: 100 
 
-# jitter 1e-7
-jitter: 0.0000001
+# jitter 1e-5
+jitter: 0.00001
 
 
 

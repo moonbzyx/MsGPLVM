@@ -1,11 +1,14 @@
 import torch
+from pyro.distributions.util import eye_like
 
 a = torch.arange(2 * 2)
-b = torch.arange(2 * 2).reshape(([2, 2])) * 0.1
+b = torch.tensor([[1, 2, 3], [4, 5, 6]], device=torch.device('cuda'))
 # a = a.unsqueeze(dim=2)
 # a = a.unsqueeze(1).expand(([2, 3, 4]))
 # c = a.expand([2, 3, 4])
-c = a
-c = a.unsqueeze(-1).expand([4, 3])
-dd = torch.eye(2, 3)
-print(dd)
+c = b[0]
+print(id(c))
+print(id(c) - id(b))
+print(id(a) - id(b))
+print(id(b[0]))
+print(b)

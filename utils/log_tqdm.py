@@ -30,20 +30,20 @@ class TqdmHandler(logging.Handler):
 def my_log(path='./../results/test_tqdm.log'):
 
     format_1 = "<green>{time:[MM-DD] HH:mm:ss}</green> | " \
-                "<level>{level: <8}</level> | " \
-                "<blue>{name}</blue>:_<cyan>{function}</cyan>:_<y>{line}</y> - <level>{message}</level>"
+        "<level>{level: <8}</level> | " \
+        "<blue>{name}</blue>:_<cyan>{function}</cyan>:_<y>{line}</y> - <level>{message}</level>"
 
     format_2 = "<green>{time:[_DD_] HH:mm:ss.SSS}</green> | " \
-                "<level>{level: <8}</level> | " \
-                "<blue>{name}</blue>:_<cyan>{function}</cyan>:_<y>{line}</y> - <level>{message}</level>"
+        "<level>{level: <8}</level> | " \
+        "<blue>{name}</blue>:_<cyan>{function}</cyan>:_<y>{line}</y> - <level>{message}</level>"
     # remove the default handler: stderr
     logger.remove()
     # replacing stderr with tqdmHandler
     handler = TqdmHandler()
     # the first handler, showing messages on screen
-    logger.add(handler, colorize=True, format=format_2, level='DEBUG')
+    logger.add(handler, colorize=True, format=format_2, level='INFO')
     # log the messages into file
-    logger.add(path, format=format_1, level='DEBUG', mode='w')
+    logger.add(path, format=format_1, level='TRACE', mode='w')
     return logger
 
 
@@ -57,7 +57,7 @@ if __name__ == '__main__':
                 # logger.debug("This is debug")
                 # logger.info("This is info")
                 # logger.error("This is error")
-                log.info(f"This is the {i} info")
+                log.trace(f"This is the {i} info")
                 log.debug(f"This is the {i} debug")
             time.sleep(0.2)
             iter_tqdm.set_description(f'This is the {i}th sample')

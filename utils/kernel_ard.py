@@ -83,7 +83,7 @@ class Isotropy(Kernel):
         """
         Calculates the diagonal part of covariance matrix on active features.
         """
-        return self.variance.expand(X.size(0))
+        return self.variance.expand(X.size(0)).to(X.device)
 
 
 class RBFard(Isotropy):
@@ -99,6 +99,8 @@ class RBFard(Isotropy):
                  variance=None,
                  lengthscale=None,
                  active_dims=None):
+        if variance is not None:
+            variance = variance.pow(2)
         super().__init__(input_dim, variance, lengthscale, active_dims)
 
     def forward(self, X, Z=None, diag=False):
@@ -106,7 +108,7 @@ class RBFard(Isotropy):
             return self._diag(X)
 
         r2 = self._square_scaled_dist(X, Z)
-        return self.variance**2 * torch.exp(-0.5 * r2)
+        return self.variance * torch.exp(-0.5 * r2).to(X.device)
 
 
 if __name__ == '__main__':

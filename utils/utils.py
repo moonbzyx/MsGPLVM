@@ -5,10 +5,18 @@ from scipy.io import loadmat
 import matplotlib.pyplot as plt
 import torch
 # from ppca import ppca
-from .ppca import ppca
+# from .ppca import ppca
 import random
+import pyro
 
 datatype = torch.float64
+
+
+def manual_seed(seed):
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    pyro.set_rng_seed(seed)
 
 
 def init_inducing(init_x, num_inducing, num_gp):
@@ -29,33 +37,18 @@ def init_inducing(init_x, num_inducing, num_gp):
     return x_u
 
 
-class statistics_psi():
-    def __init__(self, phi, sigma, w, mu, S):
-        self.phi = phi
-        self.sigma = sigma**2
-        self.w = w
-        self.mu = mu
-        self.S = S
-        self.N, self.D, self.L = self.phi.shape
-
-    def psi_0(self):
-        phi = self.phi.permute([2, 1, 0]).sum(dim=-1)
-        variance = self.sigma.unsqueeze(-1).expand([self.L, self.D])
-        psi = torch.einsum('ij,ij->ij', [phi, variance])
-        return psi
-
-    def psi_1(self):
-        pass
-
-    def psi_2(self):
-        pass
+def init_w(L, Q, device):
+    w = torch.rand([L, Q], device=device)
+    w = torch.where(w > 0.5, 0.9999, 0.0001)
+    return w
 
 
 if __name__ == '__main__':
     data = loadmat("./../datasets/toy1.mat")
-    Y = data["Y"]
-    X = torch.from_numpy(Y).to(datatype)
-    init_X = ppca(X, 8)
-    xu = init_inducing(init_X, 50, 3)
-    print(init_X.shape)
-    print(xu[0])
+    # Y = data["Y"]
+    # X = torch.from_numpy(Y).to(datatype)
+    # init_X = ppca(X, 8)
+    # xu = init_inducing(init_X, 50, 3)
+    # print(init_X.shape)
+    # print(xu[0])
+    # print(init_w(3, 8))

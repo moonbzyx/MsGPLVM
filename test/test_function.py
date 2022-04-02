@@ -19,5 +19,12 @@ bb = torch.diag(b)
 # m2 = m1.sum(dim=-1)
 # print(m2)
 # print(m2.shape)
-test = torch.einsum('ij,ij->ij', [a, b])
-print(test)
+# test = torch.einsum('ij,ij->ij', [a, b])
+
+x = [torch.zeros(1)] * 3
+# for i in range(3):
+#     x.append(i)
+xx = torch.tensor([2.0, 4.0])
+yy = xx.pow(0.5)
+print(yy)
+print(yy.pow(2))
